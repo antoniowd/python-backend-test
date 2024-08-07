@@ -45,7 +45,7 @@ def test_create_profile_missing_fields():
 
     assert response.status_code == 422
 
-def test_read_all_profile():
+def test_read_all_profiles():
     """Test reading all the profiles."""
     repository_mock = mock.Mock(spec=ProfileRepository)
     friendOne = { **profile, "id": 2, "first_name": "Jane" }
@@ -73,7 +73,7 @@ def test_read_profile():
 
 
 def test_read_profile_404():
-    """Test reading a profile."""
+    """Test reading a profile that does not exist."""
     repository_mock = mock.Mock(spec=ProfileRepository)
     repository_mock.get.return_value = None
 
@@ -95,7 +95,7 @@ def test_update_profile():
     assert response.json()["first_name"] == "Jane"
 
 def test_update_profile_404():
-    """Test updating"""
+    """Test updating a profile that does not exist."""
     repository_mock = mock.Mock(spec=ProfileRepository)
     repository_mock.update.return_value = None
 
@@ -117,7 +117,7 @@ def test_delete_profile():
     assert response.json()["id"] == 1
 
 def test_delete_profile_404():
-    """Test deleting a profile."""
+    """Test deleting a profile that does not exists."""
     repository_mock = mock.Mock(spec=ProfileRepository)
     repository_mock.delete.return_value = None
 
@@ -128,7 +128,7 @@ def test_delete_profile_404():
     assert response.json()["detail"] == "Profile not found"
 
 def test_read_all_friends():
-    """Test reading all profiles."""
+    """Test reading all friends from a profile."""
     repository_mock = mock.Mock(spec=ProfileRepository)
     friendOne = { **profile, "id": 2, "first_name": "Jane" }
     friendTwo = { **profile, "id": 3, "first_name": "Alice" }
@@ -169,7 +169,7 @@ def test_shorter_connection():
     assert response.json() == [2]
 
 def test_shorter_connection_not_found():
-    """Test to get an error when the connection is not found."""
+    """Test a connection that does not exists."""
     repository_mock = mock.Mock(spec=ProfileRepository)
 
     profile2 = {**profile, "id": 2, "first_name": "Ana"}
@@ -191,7 +191,7 @@ def test_shorter_connection_not_found():
     assert response.json()["detail"] == "No connection found"
 
 def test_shorter_connection_same_id():
-    """Test when it is the same id."""
+    """Test connection with the same id."""
     repository_mock = mock.Mock(spec=ProfileRepository)
 
     profile2 = {**profile, "id": 2, "first_name": "Ana"}
@@ -210,7 +210,7 @@ def test_shorter_connection_same_id():
     assert response.json() == [1]
 
 def test_shorter_connection_direct_one():
-    """Test when it is the same id."""
+    """Test a direct connection."""
     repository_mock = mock.Mock(spec=ProfileRepository)
 
     profile2 = {**profile, "id": 2, "first_name": "Ana"}
