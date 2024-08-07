@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 class ProfileBase(BaseModel):
     img: str
@@ -11,14 +11,12 @@ class ProfileBase(BaseModel):
     zipcode: str
     available: bool = True
 
+
 class ProfileCreate(ProfileBase):
-    pass
+    model_config = ConfigDict(from_attributes=True)
 
 class ProfileUpdate(ProfileBase):
     id: int
 
 class Profile(ProfileBase):
     id: int
-
-    class Config:
-        from_attributes = True
