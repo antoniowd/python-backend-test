@@ -1,38 +1,46 @@
 """Profile Repository module."""
+from contextlib import AbstractContextManager
+from typing import Callable
 from sqlalchemy.orm import Session
 from app.models import  Profile
 
 class ProfileRepository:
     """SQLite repository."""
-    def __init__(self):
-        self.model = Profile
+    def __init__(
+        self,
+        session_factory: Callable[..., AbstractContextManager[Session]]
+    ) -> None:
+        self.session_factory = session_factory
 
-    def get(self, db: Session, id_: int) -> Profile | None:
+    def get(self, id_: int) -> Profile | None:
         """Get a single record by ID."""
-        return db.query(self.model).filter(self.model.id == id_).first()
+        with self.session_factory() as db:
+            return db.query(Profile).filter(Profile.id == id_).first()
 
-    def list(self, db: Session):
+    def get_all(self):
         """List all records."""
-        return db.query(self.model).all()
+        with self.session_factory() as db:
+            return db.query(Profile).all()
 
-    def create(self, db: Session, item: Profile) -> Profile:
+    def create(self, item: Profile) -> Profile:
         """Create a new record."""
-        new_item = self.model = item
-        db.add(item)
-        db.commit()
-        db.refresh(new_item)
-        return new_item
+        with self.session_factory() as db:
+            db.add(item)
+            db.commit()
+            db.refresh(item)
+            return item
 
-    def update(self, db: Session, id_: int, item: Profile) -> Profile | None:
+    def update(self, item: Profile) -> Profile | None:
         """Update a record by ID."""
-        db.merge(item)
-        db.commit()
-        db.refresh(item)
-        return self.get(db, id_)
+        with self.session_factory() as db:
+            db.merge(item)
+            db.commit()
+            return item
 
-    def delete(self, db: Session, id_: int) -> Profile | None:
+    def delete(self, id_: int) -> Profile | None:
         """Delete a record by ID."""
-        item = self.get(db, id_)
-        db.delete(item)
-        db.commit()
-        return item
+        with self.session_factory() as db:
+            item = self.get(id_)
+            db.delete(item)
+            db.commit()
+            return item

@@ -1,20 +1,29 @@
 """Database module."""
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from .models import Base
+from contextlib import contextmanager
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./storage.sqlite3"
-engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+from sqlalchemy import create_engine, orm
 
-def init_db():
-    """Initialize the database."""
-    Base.metadata.create_all(bind=engine)
+Base = orm.declarative_base()
 
-def get_db():
-    """Get database session."""
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+class Database:
+    """Database class."""
+    def __init__(self, db_url: str) -> None:
+        self.engine = create_engine(db_url, connect_args={"check_same_thread": False})
+        self._session_factory = orm.scoped_session(
+            orm.sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
+        )
+
+    def create_database(self):
+        """Create the database."""
+        Base.metadata.create_all(bind=self.engine)
+
+    @contextmanager
+    def session(self):
+        """Provide a transactional scope around a series of operations."""
+        session: orm.Session = self._session_factory()
+        try:
+            yield session
+        except Exception:
+            session.rollback()
+        finally:
+            session.close()
