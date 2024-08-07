@@ -36,6 +36,15 @@ def get_profile(
         raise HTTPException(status_code=404, detail="Profile not found")
     return profile
 
+@router.get("/profiles/{id_}/friends", response_model=List[schema.Profile])
+@inject
+def get_profile_friends(
+    id_: int,
+    profile_service: ProfileService = Depends(Provide[Container.profile_service])
+):
+    """Get all friends from a profile ID."""
+    return profile_service.get_profile_friends(id_)
+
 @router.put("/profiles", response_model=schema.Profile)
 @inject
 def update_profile(

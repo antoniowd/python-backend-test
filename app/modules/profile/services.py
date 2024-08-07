@@ -16,6 +16,10 @@ class ProfileService:
         """List all profiles."""
         return self.repo.get_all()
 
+    def get_profile_friends(self, id_) -> List[Profile]:
+        """List all profiles."""
+        return self.repo.get_profile_friends(id_)
+
     def create(self, item: Profile) -> Profile:
         """Create a new profile."""
         return self.repo.create(item)

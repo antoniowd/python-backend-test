@@ -111,3 +111,18 @@ def test_delete_profile_404():
 
     assert response.status_code == 404
     assert response.json()["detail"] == "Profile not found"
+
+def test_read_all_friends():
+    """Test reading all profiles."""
+    repository_mock = mock.Mock(spec=ProfileRepository)
+    friendOne = { **profile, "id": 2, "first_name": "Jane" }
+    friendTwo = { **profile, "id": 3, "first_name": "Alice" }
+    repository_mock.get_profile_friends.return_value = [Profile(**friendOne), Profile(**friendTwo)]
+
+    with app.container.profile_repository.override(repository_mock):
+        response = client.get("/profiles/1/friends")
+
+    assert response.status_code == 200
+    assert len(response.json()) == 2
+    assert response.json()[0]["first_name"] == "Jane"
+    assert response.json()[1]["first_name"] == "Alice"
