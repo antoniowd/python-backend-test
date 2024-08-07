@@ -1,9 +1,8 @@
 """Database module."""
 from contextlib import contextmanager
 
+from app.models import Base
 from sqlalchemy import create_engine, orm
-
-Base = orm.declarative_base()
 
 class Database:
     """Database class."""
