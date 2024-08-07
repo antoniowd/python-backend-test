@@ -8,8 +8,6 @@ class Container(containers.DeclarativeContainer):
     """Dependency injection container."""
     config = providers.Configuration()
 
-    print(config.db.url)
-
     db = providers.Singleton(Database, db_url=config.db.url)
 
     profile_repository = providers.Factory(
