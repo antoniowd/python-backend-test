@@ -8,7 +8,8 @@ Base = orm.declarative_base()
 class Database:
     """Database class."""
     def __init__(self, db_url: str) -> None:
-        self.engine = create_engine(db_url, connect_args={"check_same_thread": False})
+        self.db_url = db_url
+        self.engine = create_engine(self.db_url, connect_args={"check_same_thread": False})
         self._session_factory = orm.scoped_session(
             orm.sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
         )

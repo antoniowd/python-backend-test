@@ -7,6 +7,8 @@ def create_app() -> FastAPI:
     _app = FastAPI()
     container = Container()
 
+    container.config.from_yaml("config.yml")
+
     container.wire(modules=[profile_routes])
 
     db = container.db()
