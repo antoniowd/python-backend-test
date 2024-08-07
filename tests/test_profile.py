@@ -126,3 +126,89 @@ def test_read_all_friends():
     assert len(response.json()) == 2
     assert response.json()[0]["first_name"] == "Jane"
     assert response.json()[1]["first_name"] == "Alice"
+
+def test_shorter_connection():
+    """Test getting the shortest connection between two profiles."""
+    repository_mock = mock.Mock(spec=ProfileRepository)
+
+    profile1 = {**profile, "id": 1, "first_name": "Roberto"}
+    profile2 = {**profile, "id": 2, "first_name": "Ana"}
+    profile3 = {**profile, "id": 3, "first_name": "Juan"}
+    profile4 = {**profile, "id": 4, "first_name": "Maykel"}
+    profile5 = {**profile, "id": 5, "first_name": "Leo"}
+
+    profiles = {
+        1: [Profile(**profile2), Profile(**profile3)],
+        2: [Profile(**profile1), Profile(**profile5)],
+        3: [Profile(**profile1), Profile(**profile4)],
+        4: [Profile(**profile3), Profile(**profile5)],
+        5: [Profile(**profile2), Profile(**profile4)]
+    }
+
+    repository_mock.get_profile_friends.side_effect = lambda id_: profiles[id_]
+
+    with app.container.profile_repository.override(repository_mock):
+        response = client.get("/profiles/1/shorter/5")
+
+    assert response.status_code == 200
+    assert response.json() == [2]
+
+def test_shorter_connection_not_found():
+    """Test to get an error when the connection is not found."""
+    repository_mock = mock.Mock(spec=ProfileRepository)
+
+    profile2 = {**profile, "id": 2, "first_name": "Ana"}
+    profile3 = {**profile, "id": 3, "first_name": "Juan"}
+
+    profiles = {
+        1: [Profile(**profile2), Profile(**profile3)],
+        2: [Profile(**profile3)],
+        3: [Profile(**profile2)],
+        4: []
+    }
+
+    repository_mock.get_profile_friends.side_effect = lambda id_: profiles[id_]
+
+    with app.container.profile_repository.override(repository_mock):
+        response = client.get("/profiles/1/shorter/4")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "No connection found"
+
+def test_shorter_connection_same_id():
+    """Test when it is the same id."""
+    repository_mock = mock.Mock(spec=ProfileRepository)
+
+    profile2 = {**profile, "id": 2, "first_name": "Ana"}
+    profile3 = {**profile, "id": 3, "first_name": "Juan"}
+
+    profiles = {
+        1: [Profile(**profile2), Profile(**profile3)],
+    }
+
+    repository_mock.get_profile_friends.side_effect = lambda id_: profiles[id_]
+
+    with app.container.profile_repository.override(repository_mock):
+        response = client.get("/profiles/1/shorter/1")
+
+    assert response.status_code == 200
+    assert response.json() == [1]
+
+def test_shorter_connection_direct_one():
+    """Test when it is the same id."""
+    repository_mock = mock.Mock(spec=ProfileRepository)
+
+    profile2 = {**profile, "id": 2, "first_name": "Ana"}
+
+    profiles = {
+        1: [Profile(**profile2)],
+        2: []
+    }
+
+    repository_mock.get_profile_friends.side_effect = lambda id_: profiles[id_]
+
+    with app.container.profile_repository.override(repository_mock):
+        response = client.get("/profiles/1/shorter/2")
+
+    assert response.status_code == 200
+    assert response.json() == [2]

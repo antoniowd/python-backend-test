@@ -45,6 +45,20 @@ def get_profile_friends(
     """Get all friends from a profile ID."""
     return profile_service.get_profile_friends(id_)
 
+@router.get("/profiles/{profile_id}/shorter/{friend_id}", response_model=List[int])
+@inject
+def get_shorter_connection(
+    profile_id: int,
+    friend_id: int,
+    profile_service: ProfileService = Depends(Provide[Container.profile_service])
+):
+    """Get the shortest connection between two profiles."""
+    connections = profile_service.get_shorter_connection(profile_id, friend_id)
+    if connections is None:
+        raise HTTPException(status_code=404, detail="No connection found")
+
+    return connections
+
 @router.put("/profiles", response_model=schema.Profile)
 @inject
 def update_profile(
