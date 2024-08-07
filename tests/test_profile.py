@@ -45,6 +45,21 @@ def test_create_profile_missing_fields():
 
     assert response.status_code == 422
 
+def test_read_all_profile():
+    """Test reading all the profiles."""
+    repository_mock = mock.Mock(spec=ProfileRepository)
+    friendOne = { **profile, "id": 2, "first_name": "Jane" }
+    friendTwo = { **profile, "id": 3, "first_name": "Alice" }
+    repository_mock.get_all.return_value = [Profile(**friendOne), Profile(**friendTwo)]
+
+    with app.container.profile_repository.override(repository_mock):
+        response = client.get("/profiles")
+
+    assert response.status_code == 200
+    assert len(response.json()) == 2
+    assert response.json()[0]["first_name"] == "Jane"
+    assert response.json()[1]["first_name"] == "Alice"
+
 def test_read_profile():
     """Test reading a profile."""
     repository_mock = mock.Mock(spec=ProfileRepository)
