@@ -38,6 +38,12 @@ fastapi dev app/main.py
 ```
 The application will be available at `http://localhost:8000`.
 
+## Seed
+```bash
+python seeder.py [totalProfile | 10] [totalFriends | 5]
+```
+
+
 ## API Documentation
  API documentation is available at `http://localhost:8000/docs`.
 
